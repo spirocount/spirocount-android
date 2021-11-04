@@ -13,8 +13,10 @@ import androidx.core.content.FileProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.tensorflow.lite.support.image.TensorImage;
@@ -34,9 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private TextView countDisplay;
+    private SeekBar thresholdBar;
 
     private Uri imageUri = null;
     private SpirocountImage currentImage = null;
+
+    private SpirocheteDetector detector = null;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -49,7 +54,9 @@ public class MainActivity extends AppCompatActivity {
                 currentImage = new SpirocountImage(imageUri, imageView);
                 countDisplay.setText("");
                 currentImage.loadImage();
-                new Thread(() -> runObjectDetection(currentImage)).start();
+                //new Thread(() -> runObjectDetection(currentImage)).start();
+                List<DetectionResult> results = detector.runObjectDetection(currentImage);
+                currentImage.drawDetectionResults(results);
             }
     );
 
@@ -75,9 +82,29 @@ public class MainActivity extends AppCompatActivity {
         Button captureImageButton = findViewById(R.id.capture_button);
         imageView = findViewById(R.id.image_view);
         countDisplay = findViewById(R.id.count_display);
+        thresholdBar = findViewById(R.id.threshold_bar);
+
+        detector = new SpirocheteDetector(this);
 
         loadImageButton.setOnClickListener(view -> selectImageLauncher.launch("image/*"));
         captureImageButton.setOnClickListener(view -> captureImage());
+        thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                float threshold = i / 100.0f;
+                detector.setThreshold(threshold);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // do nothing.
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     /**
