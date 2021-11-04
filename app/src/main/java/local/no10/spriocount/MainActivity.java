@@ -52,11 +52,8 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultContracts.GetContent(), uri -> {
                 imageUri = uri;
                 currentImage = new SpirocountImage(imageUri, imageView);
-                countDisplay.setText("");
                 currentImage.loadImage();
-                //new Thread(() -> runObjectDetection(currentImage)).start();
-                List<DetectionResult> results = detector.runObjectDetection(currentImage);
-                currentImage.drawDetectionResults(results);
+                new Thread(() -> runObjectDetection(currentImage)).start();
             }
     );
 
@@ -66,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
                     imageUri = null;
                 } else {
                     currentImage = new SpirocountImage(imageUri, imageView);
-                    countDisplay.setText("");
                     currentImage.loadImage();
                     new Thread(() -> runObjectDetection(currentImage)).start();
                 }
@@ -83,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.image_view);
         countDisplay = findViewById(R.id.count_display);
         thresholdBar = findViewById(R.id.threshold_bar);
+        thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
 
         detector = new SpirocheteDetector(this);
 
@@ -97,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // do nothing.
+                // Do nothing.
             }
 
             @Override
@@ -139,34 +136,13 @@ public class MainActivity extends AppCompatActivity {
      * @param scimage The spirochete image on which to run the image recognition.
      */
     public void runObjectDetection(SpirocountImage scimage) {
-        TensorImage image = scimage.tensorImage();
-        ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder()
-                .setMaxResults(50)
-                .setScoreThreshold(0.3f)
-                .build();
+        runOnUiThread(() -> countDisplay.setText("0"));
 
-        ObjectDetector detector;
-        try {
-            detector = ObjectDetector.createFromFileAndOptions(
-                    this,
-                    "model.tflite",
-                    options);
-        } catch (IOException e) {
-            return;
-        }
+        List<DetectionResult> results = detector.runObjectDetection(currentImage);
 
-        List<DetectionResult> resultsToDisplay = new ArrayList<>();
-        List<Detection> results = detector.detect(image);
-        for (Detection result : results) {
-            Category category = result.getCategories().get(0);
-            int score = (int) (category.getScore() * 100);
-            String text = String.valueOf(score);
-            resultsToDisplay.add(new DetectionResult(result.getBoundingBox(), text));
-        }
-
-        String count = String.format(Locale.getDefault(), "%d", resultsToDisplay.size());
+        String count = String.format(Locale.getDefault(), "%d", results.size());
         runOnUiThread(() -> countDisplay.setText(count));
 
-        scimage.drawDetectionResults(resultsToDisplay);
+        scimage.drawDetectionResults(results);
     }
 }

@@ -10,12 +10,11 @@ import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class SpirocheteDetector {
 
     private static final int DEFAULT_MAX_RESULTS = 50;
-    private static final float DEFAULT_THRESHOLD = 0.3f;
+    public static final float DEFAULT_THRESHOLD = 0.3f;
 
     private int maxResults;
     private float threshold;
@@ -39,6 +38,7 @@ public class SpirocheteDetector {
      * Detect spirochetes in image.
      *
      * @param scimage The spirochete image on which to run the image recognition.
+     * @return A list of all the spirochetes detected.
      */
     public List<DetectionResult> runObjectDetection(SpirocountImage scimage) {
         TensorImage image = scimage.tensorImage();
@@ -67,10 +67,5 @@ public class SpirocheteDetector {
         }
 
         return resultsToDisplay;
-
-//        String count = String.format(Locale.getDefault(), "%d", resultsToDisplay.size());
-//        // runOnUiThread(() -> countDisplay.setText(count));
-//
-//        scimage.drawDetectionResults(resultsToDisplay);
     }
 }
