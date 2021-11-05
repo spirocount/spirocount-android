@@ -10,24 +10,19 @@ import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.task.vision.detector.Detection;
-import org.tensorflow.lite.task.vision.detector.ObjectDetector;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private TextView countDisplay;
-    private SeekBar thresholdBar;
 
     private Uri imageUri = null;
     private SpirocountImage currentImage = null;
@@ -78,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
         Button captureImageButton = findViewById(R.id.capture_button);
         imageView = findViewById(R.id.image_view);
         countDisplay = findViewById(R.id.count_display);
-        thresholdBar = findViewById(R.id.threshold_bar);
+
+        SeekBar thresholdBar = findViewById(R.id.threshold_bar);
         thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
 
         detector = new SpirocheteDetector(this);
@@ -99,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                if (currentImage != null) {
+                    new Thread(() -> runObjectDetection(currentImage)).start();
+                }
             }
         });
     }
@@ -138,11 +135,12 @@ public class MainActivity extends AppCompatActivity {
     public void runObjectDetection(SpirocountImage scimage) {
         runOnUiThread(() -> countDisplay.setText("0"));
 
-        List<DetectionResult> results = detector.runObjectDetection(currentImage);
+        List<RectF> results = detector.runObjectDetection(currentImage);
 
         String count = String.format(Locale.getDefault(), "%d", results.size());
         runOnUiThread(() -> countDisplay.setText(count));
 
-        scimage.drawDetectionResults(results);
+        Bitmap display = scimage.drawDetectionResults(results);
+        runOnUiThread(() -> imageView.setImageBitmap(display));
     }
 }

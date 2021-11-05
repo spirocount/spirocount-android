@@ -1,9 +1,9 @@
 package local.no10.spriocount;
 
 import android.content.Context;
+import android.graphics.RectF;
 
 import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.label.Category;
 import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
@@ -40,7 +40,7 @@ public class SpirocheteDetector {
      * @param scimage The spirochete image on which to run the image recognition.
      * @return A list of all the spirochetes detected.
      */
-    public List<DetectionResult> runObjectDetection(SpirocountImage scimage) {
+    public List<RectF> runObjectDetection(SpirocountImage scimage) {
         TensorImage image = scimage.tensorImage();
         ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder()
                 .setMaxResults(maxResults)
@@ -57,15 +57,12 @@ public class SpirocheteDetector {
             return new ArrayList<>();
         }
 
-        List<DetectionResult> resultsToDisplay = new ArrayList<>();
+        List<RectF> boundingBoxes = new ArrayList<>();
         List<Detection> results = detector.detect(image);
         for (Detection result : results) {
-            Category category = result.getCategories().get(0);
-            int score = (int) (category.getScore() * 100);
-            String text = String.valueOf(score);
-            resultsToDisplay.add(new DetectionResult(result.getBoundingBox(), text));
+            boundingBoxes.add(result.getBoundingBox());
         }
 
-        return resultsToDisplay;
+        return boundingBoxes;
     }
 }
