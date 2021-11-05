@@ -13,9 +13,8 @@
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/image_description"
         android:scaleType="centerInside"
-        app:layout_constraintBottom_toTopOf="@+id/threshold_bar"
+        app:layout_constraintBottom_toTopOf="@+id/threshold_display"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_insert_photo" />
@@ -26,45 +25,48 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        app:layout_constraintBottom_toTopOf="@+id/load_button"
+        app:layout_constraintBottom_toTopOf="@+id/capture_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/threshold_bar" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/capture_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/capture_image_btn_text"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/load_button"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/load_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/load_image_btn_text"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/capture_button"
-        app:layout_constraintTop_toBottomOf="@+id/count_display" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <SeekBar
         android:id="@+id/threshold_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:max="100"
         app:layout_constraintBottom_toTopOf="@+id/count_display"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/image_view" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/threshold_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="Threshold:"
+        app:layout_constraintBottom_toTopOf="@+id/threshold_bar"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

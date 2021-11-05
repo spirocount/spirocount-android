@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private TextView countDisplay;
+    private TextView thresholdDisplay;
 
     private Uri imageUri = null;
     private SpirocountImage currentImage = null;
@@ -76,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
         SeekBar thresholdBar = findViewById(R.id.threshold_bar);
         thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
 
+        thresholdDisplay = findViewById(R.id.threshold_display);
+        String thresholdDisplayText = String.format(Locale.getDefault(), "Threshold: %.2f", SpirocheteDetector.DEFAULT_THRESHOLD);
+        thresholdDisplay.setText(thresholdDisplayText);
+
         detector = new SpirocheteDetector(this);
 
         loadImageButton.setOnClickListener(view -> selectImageLauncher.launch("image/*"));
@@ -84,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 float threshold = i / 100.0f;
+                String displayText = String.format(Locale.getDefault(), "Threshold: %.2f", threshold);
+                thresholdDisplay.setText(displayText);
                 detector.setThreshold(threshold);
             }
 
