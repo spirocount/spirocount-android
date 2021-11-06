@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
      * @param scimage The spirochete image on which to run the image recognition.
      */
     public void runObjectDetection(SpirocountImage scimage) {
-        runOnUiThread(() -> countDisplay.setText("0"));
+        runOnUiThread(() -> countDisplay.setText(R.string.detecting_object_notification));
 
         List<RectF> results = detector.runObjectDetection(currentImage);
 
