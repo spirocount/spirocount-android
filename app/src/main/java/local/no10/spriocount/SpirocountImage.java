@@ -6,26 +6,41 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import org.tensorflow.lite.support.image.TensorImage;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Represents an image for use with the application.
  */
 public class SpirocountImage {
 
-    private static final int imageSize = 960;
+    private static final int DEFAULT_IMAGE_SIZE = 960;
 
     private final Uri uri;
     private final ImageView view;
+    private Bitmap bitmap = null;
+
+    private final Lock imageLock = new ReentrantLock();
+    private boolean imageAvailable = false;
+    private final Condition imageCondition = imageLock.newCondition();
 
     /**
      * Construct a SpirocountImage backed by a URI.
@@ -42,11 +57,35 @@ public class SpirocountImage {
      * Load the image into the view.
      */
     public void loadImage() {
+        Glide.with(view.getContext()).clear(view);
+        imageLock.lock();
+        imageAvailable = false;
         Glide.with(view.getContext())
                 .load(uri)
                 .error(R.drawable.ic_baseline_broken_image)
-                .override(imageSize)
+                .placeholder(R.drawable.ic_baseline_insert_photo)
+                .override(DEFAULT_IMAGE_SIZE)
                 .centerInside()
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        bitmap = null;
+                        imageAvailable = true;
+                        imageCondition.signalAll();
+                        imageLock.unlock();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        BitmapDrawable img = (BitmapDrawable) resource;
+                        bitmap = img.getBitmap();
+                        imageAvailable = true;
+                        imageCondition.signalAll();
+                        imageLock.unlock();
+                        return true;
+                    }
+                })
                 .into(view);
     }
 
@@ -56,13 +95,18 @@ public class SpirocountImage {
      * @return Bitmap underlying the image.
      */
     public Bitmap bitmap() {
-        // TODO(dje): This is a nasty hack and needs to go!
-        while (view.getDrawable() == null) {
-            // haha spinlock go burr!
+        imageLock.lock();
+        while (!imageAvailable) {
+            try {
+                imageCondition.await(100L, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ignored) {
+
+            }
         }
 
-        BitmapDrawable img = (BitmapDrawable) view.getDrawable();
-        return img.getBitmap();
+        Bitmap image = bitmap;
+        imageLock.unlock();
+        return image;
     }
 
     /**
@@ -80,19 +124,20 @@ public class SpirocountImage {
      * Draw boxes around the detected objects.
      *
      * @param detectionResults List of detected objects.
+     * @return A new bitmap with the detected Spirochetes outlined.
      */
-    public void drawDetectionResults(@NonNull List<DetectionResult> detectionResults) {
-        Canvas canvas = new Canvas(bitmap());
+    public Bitmap drawDetectionResults(@NonNull List<RectF> detectionResults) {
+        Bitmap boxedImage = bitmap.copy(bitmap.getConfig(), true);
+        Canvas canvas = new Canvas(boxedImage);
         Paint pen = new Paint();
         pen.setColor(Color.RED);
-        pen.setStrokeWidth(8f);
+        pen.setStrokeWidth(8.0f);
         pen.setStyle(Paint.Style.STROKE);
 
-        // Since this gets called from the processing thread, there is no performance benefit to the
-        // UI thread for returning a new image and then displaying it to the view.
-        for (DetectionResult result : detectionResults) {
-            RectF box = result.boundingBox;
-            canvas.drawRect(box, pen);
+        for (RectF result : detectionResults) {
+            canvas.drawRect(result, pen);
         }
+
+        return boxedImage;
     }
 }

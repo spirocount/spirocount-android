@@ -10,22 +10,19 @@ import android.content.pm.PackageManager;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
-
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.task.vision.detector.Detection;
-import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -34,9 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
     private TextView countDisplay;
+    private TextView thresholdDisplay;
 
     private Uri imageUri = null;
     private SpirocountImage currentImage = null;
+
+    private SpirocheteDetector detector = null;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultContracts.GetContent(), uri -> {
                 imageUri = uri;
                 currentImage = new SpirocountImage(imageUri, imageView);
-                countDisplay.setText("");
                 currentImage.loadImage();
                 new Thread(() -> runObjectDetection(currentImage)).start();
             }
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
                     imageUri = null;
                 } else {
                     currentImage = new SpirocountImage(imageUri, imageView);
-                    countDisplay.setText("");
                     currentImage.loadImage();
                     new Thread(() -> runObjectDetection(currentImage)).start();
                 }
@@ -76,8 +74,38 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.image_view);
         countDisplay = findViewById(R.id.count_display);
 
+        SeekBar thresholdBar = findViewById(R.id.threshold_bar);
+        thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
+
+        thresholdDisplay = findViewById(R.id.threshold_display);
+        String thresholdDisplayText = String.format(Locale.getDefault(), "Threshold: %.2f", SpirocheteDetector.DEFAULT_THRESHOLD);
+        thresholdDisplay.setText(thresholdDisplayText);
+
+        detector = new SpirocheteDetector(this);
+
         loadImageButton.setOnClickListener(view -> selectImageLauncher.launch("image/*"));
         captureImageButton.setOnClickListener(view -> captureImage());
+        thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                float threshold = i / 100.0f;
+                String displayText = String.format(Locale.getDefault(), "Threshold: %.2f", threshold);
+                thresholdDisplay.setText(displayText);
+                detector.setThreshold(threshold);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Do nothing.
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (currentImage != null) {
+                    new Thread(() -> runObjectDetection(currentImage)).start();
+                }
+            }
+        });
     }
 
     /**
@@ -112,34 +140,14 @@ public class MainActivity extends AppCompatActivity {
      * @param scimage The spirochete image on which to run the image recognition.
      */
     public void runObjectDetection(SpirocountImage scimage) {
-        TensorImage image = scimage.tensorImage();
-        ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder()
-                .setMaxResults(50)
-                .setScoreThreshold(0.3f)
-                .build();
+        runOnUiThread(() -> countDisplay.setText("0"));
 
-        ObjectDetector detector;
-        try {
-            detector = ObjectDetector.createFromFileAndOptions(
-                    this,
-                    "model.tflite",
-                    options);
-        } catch (IOException e) {
-            return;
-        }
+        List<RectF> results = detector.runObjectDetection(currentImage);
 
-        List<DetectionResult> resultsToDisplay = new ArrayList<>();
-        List<Detection> results = detector.detect(image);
-        for (Detection result : results) {
-            Category category = result.getCategories().get(0);
-            int score = (int) (category.getScore() * 100);
-            String text = String.valueOf(score);
-            resultsToDisplay.add(new DetectionResult(result.getBoundingBox(), text));
-        }
-
-        String count = String.format(Locale.getDefault(), "%d", resultsToDisplay.size());
+        String count = String.format(Locale.getDefault(), "%d", results.size());
         runOnUiThread(() -> countDisplay.setText(count));
 
-        scimage.drawDetectionResults(resultsToDisplay);
+        Bitmap display = scimage.drawDetectionResults(results);
+        runOnUiThread(() -> imageView.setImageBitmap(display));
     }
 }
