@@ -6,7 +6,7 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "local.no10.spriocount"
+        applicationId "local.no10.spirocount"
         minSdk 23
         targetSdk 31
         versionCode 1
