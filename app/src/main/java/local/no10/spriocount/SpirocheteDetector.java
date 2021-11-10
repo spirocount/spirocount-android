@@ -13,21 +13,14 @@ import java.util.List;
 
 public class SpirocheteDetector {
 
-    private static final int DEFAULT_MAX_RESULTS = 50;
     public static final float DEFAULT_THRESHOLD = 0.3f;
 
-    private int maxResults;
     private float threshold;
     private final Context context;
 
     SpirocheteDetector(Context context) {
         this.context = context;
-        this.maxResults = DEFAULT_MAX_RESULTS;
         this.threshold = DEFAULT_THRESHOLD;
-    }
-
-    public void setMaxResults(int maxResults) {
-        this.maxResults = maxResults;
     }
 
     public void setThreshold(float threshold) {
@@ -43,7 +36,6 @@ public class SpirocheteDetector {
     public List<RectF> runObjectDetection(SpirocountImage scimage) {
         TensorImage image = scimage.tensorImage();
         ObjectDetector.ObjectDetectorOptions options = ObjectDetector.ObjectDetectorOptions.builder()
-                .setMaxResults(maxResults)
                 .setScoreThreshold(threshold)
                 .build();
 
