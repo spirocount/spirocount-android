@@ -3,5 +3,6 @@
     <string name="image_description">Spirochete Image</string>
     <string name="capture_image_btn_text">Capture Image</string>
     <string name="load_image_btn_text">Load Image</string>
-    <string name="detecting_object_notification">counting...</string>
+    <string name="detecting_object_notification">counting…</string>
+    <string name="threshold_label">Threshold:</string>
 </resources>

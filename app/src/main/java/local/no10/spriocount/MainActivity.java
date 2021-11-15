@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
 
         thresholdDisplay = findViewById(R.id.threshold_display);
-        String thresholdDisplayText = String.format(Locale.getDefault(), "Threshold: %.2f", SpirocheteDetector.DEFAULT_THRESHOLD);
+        String thresholdDisplayText = String.format(Locale.getDefault(), "%.2f", SpirocheteDetector.DEFAULT_THRESHOLD);
         thresholdDisplay.setText(thresholdDisplayText);
 
         detector = new SpirocheteDetector(this);
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 float threshold = i / 100.0f;
-                String displayText = String.format(Locale.getDefault(), "Threshold: %.2f", threshold);
+                String displayText = String.format(Locale.getDefault(), "%.2f", threshold);
                 thresholdDisplay.setText(displayText);
                 detector.setThreshold(threshold);
             }
