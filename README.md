@@ -33,6 +33,16 @@ An Android device with a camera, running Android version 6.0 (Marshmallow) or hi
 4. Use the device's camera to capture a new image and detect the number of spirochetes.
 5. Load an image already in the device's storage and detect the number of spirochetes.
 
+## Contributing
+
+**We would love to have more images with which to improve our model**. Please contact us if you would
+like to share your images. The more images we can collect, the more we can improve the model and
+the quality of the image recognition.
+
+Additionally, please submit any bug reports, feature requests, or code for the user interface by
+raising a github issue or pull request. Issues related to the model are also welcome, but please
+submit them to the appropriate repository at <https://github.com/wkboyle/spirochete_vision>.
+
 ## Credits
 
 Inspired by the Android CodeLab ["Build and deploy a custom object detection model with TensorFlow
