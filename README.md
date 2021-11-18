@@ -45,5 +45,14 @@ submit them to the appropriate repository at <https://github.com/wkboyle/spiroch
 
 ## Credits
 
-Inspired by the Android CodeLab ["Build and deploy a custom object detection model with TensorFlow
-Lite"](https://developers.google.com/codelabs/tflite-object-detection-android#0).
+This project is inspired by the Android CodeLab ["Build and deploy a custom object detection model
+with TensorFlow Lite"](https://developers.google.com/codelabs/tflite-object-detection-android#0).
+
+This project extends the code lab by:
+* Porting the Kotlin code to Java.
+* Extending image loading functionality to use device storage.
+* Making image loading and scaling more robust.
+* Adding user configuration of the object detection threshold.
+* Displaying a count of detected objects rather than class label and confidence data.
+* General refactoring and updating api usage.
+* Utilizing a custom model specifically trained to detect spirochetes.
