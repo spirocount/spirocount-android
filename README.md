@@ -35,7 +35,7 @@ An Android device with a camera, running Android version 6.0 (Marshmallow) or hi
 
 ## Contributing
 
-**We would love to have more images with which to improve our model**. Please contact us if you would
+**We would love to have more images with which to improve our model**. Please contact us at spirocount@gmail.com if you would
 like to share your images. The more images we can collect, the more we can improve the model and
 the quality of the image recognition.
 
