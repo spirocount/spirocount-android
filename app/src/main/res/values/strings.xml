@@ -7,4 +7,5 @@
     <string name="threshold_label">Threshold:</string>
     <string name="open_source">Open Source</string>
     <string name="about">About</string>
+    <string name="about_text">Hello and thank you for trying the Spirocount app. We are currently seeking collaborators to share images to improve the detection model. We are also exploring adapting this to new uses such as live imaging and connected devices. For contact, attribution, and further information visit: https://github.com/spirocount</string>
 </resources>
