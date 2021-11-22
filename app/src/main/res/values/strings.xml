@@ -5,4 +5,5 @@
     <string name="load_image_btn_text">Load Image</string>
     <string name="detecting_object_notification">counting…</string>
     <string name="threshold_label">Threshold:</string>
+    <string name="open_source">Open Source</string>
 </resources>
