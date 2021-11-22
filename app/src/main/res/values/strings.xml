@@ -6,4 +6,5 @@
     <string name="detecting_object_notification">counting…</string>
     <string name="threshold_label">Threshold:</string>
     <string name="open_source">Open Source</string>
+    <string name="about">About</string>
 </resources>
