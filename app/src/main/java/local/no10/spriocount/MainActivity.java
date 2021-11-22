@@ -148,6 +148,10 @@ public class MainActivity extends AppCompatActivity {
             Intent ossLicenseIntent = new Intent(this, OssLicensesMenuActivity.class);
             startActivity(ossLicenseIntent);
             return true;
+        } else if (itemID == R.id.about_menu_item) {
+            Intent aboutIntent = new Intent(this, AboutActivity.class);
+            startActivity(aboutIntent);
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
