@@ -14,17 +14,9 @@
 
 package local.no10.spriocount;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.net.Uri;
@@ -33,10 +25,14 @@ import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.view.View;
 import android.widget.SeekBar;
-import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 
@@ -47,12 +43,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import local.no10.spriocount.databinding.ActivityMainBinding;
+
 public class MainActivity extends AppCompatActivity {
-
-    private ImageView imageView;
-    private TextView countDisplay;
-    private TextView thresholdDisplay;
-
+    private ActivityMainBinding binding;
     private Uri imageUri = null;
     private SpirocountImage currentImage = null;
 
@@ -66,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private final ActivityResultLauncher<String> selectImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
                 imageUri = uri;
-                currentImage = new SpirocountImage(imageUri, imageView);
+                currentImage = new SpirocountImage(imageUri, binding.imageView);
                 currentImage.loadImage();
                 new Thread(() -> runObjectDetection(currentImage)).start();
             }
@@ -77,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!result) {
                     imageUri = null;
                 } else {
-                    currentImage = new SpirocountImage(imageUri, imageView);
+                    currentImage = new SpirocountImage(imageUri, binding.imageView);
                     currentImage.loadImage();
                     new Thread(() -> runObjectDetection(currentImage)).start();
                 }
@@ -87,30 +81,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        View mainView = binding.getRoot();
+        setContentView(mainView);
 
-        Button loadImageButton = findViewById(R.id.load_button);
-        Button captureImageButton = findViewById(R.id.capture_button);
-        imageView = findViewById(R.id.image_view);
-        countDisplay = findViewById(R.id.count_display);
+        int defaultThresholdProgress = Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100);
+        binding.thresholdBar.setProgress(defaultThresholdProgress);
 
-        SeekBar thresholdBar = findViewById(R.id.threshold_bar);
-        thresholdBar.setProgress(Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100));
-
-        thresholdDisplay = findViewById(R.id.threshold_display);
-        String thresholdDisplayText = String.format(Locale.getDefault(), "%.2f", SpirocheteDetector.DEFAULT_THRESHOLD);
-        thresholdDisplay.setText(thresholdDisplayText);
+        String thresholdDisplayText = String.format(
+                Locale.getDefault(),
+                "%.2f",
+                SpirocheteDetector.DEFAULT_THRESHOLD);
+        binding.thresholdDisplay.setText(thresholdDisplayText);
 
         detector = new SpirocheteDetector(this);
 
-        loadImageButton.setOnClickListener(view -> selectImageLauncher.launch("image/*"));
-        captureImageButton.setOnClickListener(view -> captureImage());
-        thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        binding.loadButton.setOnClickListener(view -> selectImageLauncher.launch("image/*"));
+        binding.captureButton.setOnClickListener(view -> captureImage());
+        binding.thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 float threshold = i / 100.0f;
                 String displayText = String.format(Locale.getDefault(), "%.2f", threshold);
-                thresholdDisplay.setText(displayText);
+                binding.thresholdDisplay.setText(displayText);
                 detector.setThreshold(threshold);
             }
 
@@ -189,14 +182,14 @@ public class MainActivity extends AppCompatActivity {
      * @param scimage The spirochete image on which to run the image recognition.
      */
     public void runObjectDetection(SpirocountImage scimage) {
-        runOnUiThread(() -> countDisplay.setText(R.string.detecting_object_notification));
+        runOnUiThread(() -> binding.countDisplay.setText(R.string.detecting_object_notification));
 
         List<RectF> results = detector.runObjectDetection(currentImage);
 
         String count = String.format(Locale.getDefault(), "%d", results.size());
-        runOnUiThread(() -> countDisplay.setText(count));
+        runOnUiThread(() -> binding.countDisplay.setText(count));
 
         Bitmap display = scimage.drawDetectionResults(results);
-        runOnUiThread(() -> imageView.setImageBitmap(display));
+        runOnUiThread(() -> binding.imageView.setImageBitmap(display));
     }
 }
