@@ -1,6 +1,5 @@
-package local.no10.spriocount;
+package com.spirocount.spriocount;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;

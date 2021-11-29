@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package local.no10.spriocount;
+package com.spirocount.spriocount;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

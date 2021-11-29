@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="local.no10.spriocount">
+    package="com.spirocount.spriocount">
 
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-feature

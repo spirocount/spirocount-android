@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package local.no10.spriocount;
+package com.spirocount.spriocount;
 
 import android.Manifest;
 import android.content.Intent;
@@ -43,7 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import local.no10.spriocount.databinding.ActivityMainBinding;
+import com.spirocount.spriocount.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
