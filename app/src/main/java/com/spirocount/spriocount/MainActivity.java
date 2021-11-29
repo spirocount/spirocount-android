@@ -52,11 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SpirocheteDetector detector = null;
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), isGranted -> {
-            }
-    );
-
     private final ActivityResultLauncher<String> selectImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
                 imageUri = uri;
@@ -154,16 +149,6 @@ public class MainActivity extends AppCompatActivity {
      * Launch camera to capture new image.
      */
     private void captureImage() {
-        int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-
-            permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-        }
-
         String fileName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         File file;
         try {
