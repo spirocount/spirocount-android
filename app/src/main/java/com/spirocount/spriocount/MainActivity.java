@@ -14,14 +14,11 @@
 
 package com.spirocount.spriocount;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,31 +28,26 @@ import android.widget.SeekBar;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.spirocount.spriocount.databinding.ActivityMainBinding;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.spirocount.spriocount.databinding.ActivityMainBinding;
-
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
-    private Uri imageUri = null;
+    private TempFileManager tempFileManager;
     private SpirocountImage currentImage = null;
 
     private SpirocheteDetector detector = null;
 
     private final ActivityResultLauncher<String> selectImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
-                imageUri = uri;
-                currentImage = new SpirocountImage(imageUri, binding.imageView);
+                currentImage = new SpirocountImage(uri, binding.imageView);
                 currentImage.loadImage();
                 new Thread(() -> runObjectDetection(currentImage)).start();
             }
@@ -64,9 +56,9 @@ public class MainActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Uri> captureImageLauncher = registerForActivityResult(
             new ActivityResultContracts.TakePicture(), result -> {
                 if (!result) {
-                    imageUri = null;
+                    tempFileManager.deleteTempFile();
                 } else {
-                    currentImage = new SpirocountImage(imageUri, binding.imageView);
+                    currentImage = new SpirocountImage(tempFileManager.getTempFileUri(), binding.imageView);
                     currentImage.loadImage();
                     new Thread(() -> runObjectDetection(currentImage)).start();
                 }
@@ -79,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View mainView = binding.getRoot();
         setContentView(mainView);
+
+        tempFileManager = new TempFileManager();
 
         int defaultThresholdProgress = Math.round(SpirocheteDetector.DEFAULT_THRESHOLD * 100);
         binding.thresholdBar.setProgress(defaultThresholdProgress);
@@ -116,6 +110,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        tempFileManager.deleteTempFile();
+        super.onDestroy();
+    }
+
+
     /**
      * Create the options menu.
      */
@@ -149,16 +150,15 @@ public class MainActivity extends AppCompatActivity {
      * Launch camera to capture new image.
      */
     private void captureImage() {
-        String fileName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        File file;
         try {
-            file = File.createTempFile(fileName, ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES));
-            imageUri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".fileProvider", file);
-        } catch (IOException | IllegalArgumentException e) {
+            File file = File.createTempFile("spirocount_image", null, this.getCacheDir());
+            Uri imageUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileProvider", file);
+            tempFileManager.storeTempFile(file, imageUri);
+        } catch (IOException e) {
             return;
         }
 
-        captureImageLauncher.launch(imageUri);
+        captureImageLauncher.launch(tempFileManager.getTempFileUri());
     }
 
     /**
