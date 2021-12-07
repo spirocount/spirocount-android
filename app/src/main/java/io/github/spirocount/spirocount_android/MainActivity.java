@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.spirocount.spriocount;
+package io.github.spirocount.spirocount_android;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,12 +31,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
-import com.spirocount.spriocount.databinding.ActivityMainBinding;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import io.github.spirocount.spirocount_android.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;

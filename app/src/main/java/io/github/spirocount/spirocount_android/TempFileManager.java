@@ -1,4 +1,4 @@
-package com.spirocount.spriocount;
+package io.github.spirocount.spirocount_android;
 
 import android.net.Uri;
 
